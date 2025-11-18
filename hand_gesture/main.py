@@ -32,8 +32,8 @@ MIN_DETECTION_CONFIDENCE = 0.7
 MIN_TRACKING_CONFIDENCE = 0.5
 KEYPOINT_MODEL_PATH = REPO_ROOT / 'models/keypoint/keypoint_classifier.tflite'
 POINT_HISTORY_MODEL_PATH = REPO_ROOT / 'models/point_history/point_history_classifier.tflite'
-KEYPOINT_LABEL_PATH = PACKAGE_ROOT / 'data/keypoint_labels.csv'
-POINT_HISTORY_LABEL_PATH = PACKAGE_ROOT / 'data/point_history_labels.csv'
+KEYPOINT_LABEL_PATH = REPO_ROOT / 'data/keypoint_labels.csv'
+POINT_HISTORY_LABEL_PATH = REPO_ROOT / 'data/point_history_labels.csv'
 KEYPOINT_CSV_PATH = REPO_ROOT / 'data/keypoint.csv'
 POINT_HISTORY_CSV_PATH = REPO_ROOT / 'data/point_history.csv'
 

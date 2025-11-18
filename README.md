@@ -17,7 +17,9 @@ This repository contains a modular toolkit for hand-gesture recognition using Me
 ├── requirements.txt
 ├── data/
 │   ├── keypoint.csv                  # static gesture dataset (42 features)
-│   └── point_history.csv             # dynamic gesture dataset (32 features)
+│   ├── point_history.csv             # dynamic gesture dataset (32 features)
+│   ├── keypoint_labels.csv           # labels
+│   └── point_history_labels.csv      # labels
 ├── models/                           # Contains pre-trained models
 ├── notebooks/                        # Contains training notebooks
 └── hand_gesture/                     # Source package
@@ -27,9 +29,6 @@ This repository contains a modular toolkit for hand-gesture recognition using Me
       ├── inference.py
       ├── mediapipe_hands.py
       ├── preprocessing.py
-      ├── data/
-      │   ├── keypoint_labels.csv
-      │   └── point_history_labels.csv
       ├── models/
       │   ├── __init__.py
       │   ├── keypoint_classifier.py
