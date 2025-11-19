@@ -5,6 +5,8 @@ import copy
 
 import cv2 as cv
 
+from hand_gesture.utils.smoother import EMASmoother, KalmanSmoother
+
 from hand_gesture import PACKAGE_ROOT, REPO_ROOT
 from hand_gesture.camera import Camera
 from hand_gesture.inference import GestureHistory, LoggingMode, load_labels, log_sample, select_mode
@@ -52,6 +54,10 @@ def main() -> None:
     fps_calc = CvFpsCalc(buffer_len=10)
     gesture_history = GestureHistory()
 
+    #smoother
+    ema_smoother = EMASmoother(alpha=0.6)
+    kalman_smoother = KalmanSmoother(dt=1.0, process_variance=1e-2, measurement_variance=1e-1)
+
     with Camera(DEVICE, CAPTURE_WIDTH, CAPTURE_HEIGHT) as camera, HandLandmarkDetector(
         static_image_mode=USE_STATIC_IMAGE_MODE,
         min_detection_confidence=MIN_DETECTION_CONFIDENCE,
@@ -81,6 +87,25 @@ def main() -> None:
                 for hand_landmarks, handedness in zip(results.multi_hand_landmarks, results.multi_handedness):
                     brect = calc_bounding_rect(debug_image, hand_landmarks)
                     landmark_list = calc_landmark_list(debug_image, hand_landmarks)
+
+                    # 1. 取 index finger (id = 8)
+                    # -------------------------------
+                    raw_x, raw_y = landmark_list[8]
+
+                    # -------------------------------
+                    # 2. 平滑处理（任选其一）
+                    # -------------------------------
+                    ema_x, ema_y = ema_smoother.smooth((raw_x, raw_y))
+                    kal_x, kal_y = kalman_smoother.smooth((raw_x, raw_y))
+
+                    # 建议用 Kalman（更稳）
+                    smoothed_point = (kal_x, kal_y)
+
+                    # -------------------------------
+                    # 3. 用平滑后的点替换 landmark_list 中第 8 个点
+                    # -------------------------------
+                    landmark_list[8][0] = int(smoothed_point[0])
+                    landmark_list[8][1] = int(smoothed_point[1])
 
                     preprocessed_landmarks = pre_process_landmarks(landmark_list)
                     preprocessed_point_history = gesture_history.preprocess_point_history(debug_image)
