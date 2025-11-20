@@ -32,7 +32,11 @@ CAPTURE_HEIGHT = 540
 USE_STATIC_IMAGE_MODE = False
 MIN_DETECTION_CONFIDENCE = 0.7
 MIN_TRACKING_CONFIDENCE = 0.5
-KEYPOINT_MODEL_PATH = REPO_ROOT / 'models/keypoint/keypoint_classifier.tflite'
+# 选择要加载的 keypoint tflite 模型：change KEYPOINT_MODEL_PATH in main.py and model_pyth in classifier.py 
+# - `keypoint_classifier_1dcnn.tflite` : 1D-CNN，训练时使用 `Input(shape=(21,2))`，推理需要 `(1,21,2)`
+# - `keypoint_classifier_mlp.tflite`   : MLP / 扁平输入，通常接受 `(1,42)`
+# 默认指向仓库中存在的 1D-CNN 模型（可根据需要改回 MLP）
+KEYPOINT_MODEL_PATH = REPO_ROOT / 'models/keypoint/keypoint_classifier_mlp.tflite'
 POINT_HISTORY_MODEL_PATH = REPO_ROOT / 'models/point_history/point_history_classifier.tflite'
 KEYPOINT_LABEL_PATH = REPO_ROOT / 'data/keypoint_labels.csv'
 POINT_HISTORY_LABEL_PATH = REPO_ROOT / 'data/point_history_labels.csv'
