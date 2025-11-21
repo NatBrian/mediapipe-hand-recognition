@@ -8,6 +8,7 @@ import numpy as np
 import tensorflow as tf
 
 from hand_gesture import REPO_ROOT
+from hand_gesture.models._lite_runtime import create_tflite_interpreter
 
 
 class KeyPointClassifier:
@@ -35,10 +36,7 @@ class KeyPointClassifier:
 
         if self._backend == "tflite":
             # Original TFLite behavior
-            self.interpreter = tf.lite.Interpreter(
-                model_path=str(self.model_path),
-                num_threads=num_threads,
-            )
+            self.interpreter = create_tflite_interpreter(self.model_path, num_threads)
             self.interpreter.allocate_tensors()
             self.input_details = self.interpreter.get_input_details()
             self.output_details = self.interpreter.get_output_details()
