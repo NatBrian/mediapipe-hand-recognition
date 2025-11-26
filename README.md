@@ -47,10 +47,31 @@ This repository contains a modular toolkit for hand-gesture recognition using Me
    ```
 
 ## Usage (Running the demo)
+
+### Normal Mode (Default)
 Run the main application module from the repository root:
 ```bash
 python -m hand_gesture.main
 ```
+This mode is for testing and data collection. Gestures are recognized and displayed, but no keyboard shortcuts or mouse control are triggered.
+
+### Application Mode (Shortcuts Enabled)
+To enable gesture-controlled shortcuts and mouse control:
+```bash
+python -m hand_gesture.main --application
+```
+or using the short form:
+```bash
+python -m hand_gesture.main -a
+```
+
+**Application Mode Features:**
+- **Open Hand** → App Switcher (Mac: `Cmd+Tab`, Windows: `Alt+Tab`)
+- **OK Sign** → Search (Mac: `Cmd+Space` for Spotlight, Windows: `Win+S`)
+- **Peace Sign** → Mission Control/Task View (Mac: `Ctrl+Up`, Windows: `Win+Tab`)
+- **Pointer Gesture** → Mouse cursor follows your index finger tip
+
+**Note:** Application mode requires Accessibility permissions on macOS and Windows to control keyboard and mouse. The shortcuts are cross-platform and automatically adapt to your operating system.
 
 ### Controls and Data Collection
 - `Esc`: Quit the application.
