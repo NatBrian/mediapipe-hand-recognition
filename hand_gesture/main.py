@@ -6,6 +6,7 @@ import copy
 import cv2 as cv
 
 from hand_gesture import PACKAGE_ROOT, REPO_ROOT
+from hand_gesture.application import ShortcutExecutor
 from hand_gesture.camera import Camera
 from hand_gesture.inference import GestureHistory, LoggingMode, load_labels, log_sample, select_mode
 from hand_gesture.mediapipe_hands import HandLandmarkDetector
@@ -30,7 +31,7 @@ CAPTURE_HEIGHT = 540
 USE_STATIC_IMAGE_MODE = False
 MIN_DETECTION_CONFIDENCE = 0.7
 MIN_TRACKING_CONFIDENCE = 0.5
-KEYPOINT_MODEL_PATH = REPO_ROOT / 'models/keypoint/keypoint_classifier.tflite'
+KEYPOINT_MODEL_PATH = REPO_ROOT / 'models/keypoint/keypoint_classifier_mlp.tflite'
 POINT_HISTORY_MODEL_PATH = REPO_ROOT / 'models/point_history/point_history_classifier.tflite'
 KEYPOINT_LABEL_PATH = REPO_ROOT / 'data/keypoint_labels.csv'
 POINT_HISTORY_LABEL_PATH = REPO_ROOT / 'data/point_history_labels.csv'
@@ -51,6 +52,7 @@ def main() -> None:
 
     fps_calc = CvFpsCalc(buffer_len=10)
     gesture_history = GestureHistory()
+    shortcut_executor = ShortcutExecutor(debounce_seconds=0.5, enabled=True)
 
     with Camera(DEVICE, CAPTURE_WIDTH, CAPTURE_HEIGHT) as camera, HandLandmarkDetector(
         static_image_mode=USE_STATIC_IMAGE_MODE,
@@ -98,6 +100,16 @@ def main() -> None:
                         if stabilized_finger_gesture_id < len(point_history_labels)
                         else str(stabilized_finger_gesture_id)
                     )
+
+                    # Execute shortcuts only in NORMAL mode (not during data logging)
+                    if mode == LoggingMode.NORMAL:
+                        # Move mouse if Pointer gesture is detected
+                        if hand_sign_id == 2:  # Pointer gesture ID
+                            shortcut_executor.move_mouse(landmark_list, CAPTURE_WIDTH, CAPTURE_HEIGHT)
+                        else:
+                            shortcut_executor.execute_keypoint_gesture(hand_sign_id)
+                        # Point history gestures disabled for now - uncomment to enable
+                        # shortcut_executor.execute_point_history_gesture(stabilized_finger_gesture_id)
 
                     debug_image = draw_bounding_rect(debug_image, brect)
                     debug_image = draw_landmarks(debug_image, landmark_list)
