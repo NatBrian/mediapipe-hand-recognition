@@ -8,6 +8,7 @@ import cv2 as cv
 from hand_gesture.utils.smoother import EMASmoother, KalmanSmoother
 
 from hand_gesture import PACKAGE_ROOT, REPO_ROOT
+from hand_gesture.application import ShortcutExecutor
 from hand_gesture.camera import Camera
 from hand_gesture.inference import GestureHistory, LoggingMode, load_labels, log_sample, select_mode
 from hand_gesture.mediapipe_hands import HandLandmarkDetector
@@ -49,6 +50,14 @@ MODE_TEXT = {
 }
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description='Hand Gesture Recognition with optional application shortcuts')
+    parser.add_argument(
+        '--application', '-a',
+        action='store_true',
+        help='Enable application mode: gestures will trigger keyboard shortcuts and mouse control'
+    )
+    args = parser.parse_args()
+
     keypoint_labels = load_labels(KEYPOINT_LABEL_PATH)
     point_history_labels = load_labels(POINT_HISTORY_LABEL_PATH)
 
@@ -57,6 +66,14 @@ def main() -> None:
 
     fps_calc = CvFpsCalc(buffer_len=10)
     gesture_history = GestureHistory()
+    
+    # Only enable shortcuts if --application flag is provided
+    if args.application:
+        shortcut_executor = ShortcutExecutor(debounce_seconds=0.3, enabled=True)
+        print("[Application Mode] Shortcuts and mouse control ENABLED")
+    else:
+        shortcut_executor = ShortcutExecutor(debounce_seconds=0.3, enabled=False)
+        print("[Normal Mode] Shortcuts and mouse control DISABLED (use --application to enable)")
 
     #smoother
     ema_smoother = EMASmoother(alpha=0.6)
@@ -127,6 +144,16 @@ def main() -> None:
                         if stabilized_finger_gesture_id < len(point_history_labels)
                         else str(stabilized_finger_gesture_id)
                     )
+
+                    # Execute shortcuts only in NORMAL mode and if application mode is enabled
+                    if mode == LoggingMode.NORMAL and shortcut_executor.enabled:
+                        # Move mouse if Pointer gesture is detected
+                        if hand_sign_id == 2:  # Pointer gesture ID
+                            shortcut_executor.move_mouse(landmark_list, CAPTURE_WIDTH, CAPTURE_HEIGHT)
+                        else:
+                            shortcut_executor.execute_keypoint_gesture(hand_sign_id)
+                        # Point history gestures disabled for now - uncomment to enable
+                        # shortcut_executor.execute_point_history_gesture(stabilized_finger_gesture_id)
 
                     debug_image = draw_bounding_rect(debug_image, brect)
                     debug_image = draw_landmarks(debug_image, landmark_list)
